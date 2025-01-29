@@ -140,7 +140,7 @@ def get_devlist(cookie):
 
 
 
-def set_device(devlist):
+def set_device(devlist, device=None):
     # Ensure 'devices' key is in the dictionary and it's a list
     if not isinstance(devlist, dict) or "devices" not in devlist or not isinstance(devlist["devices"], list):
         print("Invalid device list format.")
@@ -148,7 +148,16 @@ def set_device(devlist):
 
     # Iterate through devices in the list
     for device_info in devlist["devices"]:
-        if "ECHO" in device_info.get("deviceFamily", ""):  # Check if "ECHO" is in deviceFamily
+        if device != None:
+            if device_info.get("accountName") == device:
+                return {
+                    "device": device_info.get("accountName", "Unknown Device"),
+                    "deviceserialnumber": device_info["serialNumber"],
+                    "devicefamily": device_info["deviceFamily"],
+                    "devicetype": device_info["deviceType"],
+                }
+        # if device not specified: find the first ECHO device.
+        elif "ECHO" in device_info.get("deviceFamily", ""):
 
             # Ensure all required keys are present
             required_keys = {"deviceType", "serialNumber", "deviceFamily"}
@@ -230,7 +239,7 @@ def fetch_cookie_with_refresh_token(refresh_token):
 
 
 
-def executeCommand(command, refresh_token):
+def execute_command(command_type, command_message, refresh_token, device=None):
 
     # Step 1: Fetch the cookie
     print("Fetching cookies...")
@@ -254,6 +263,7 @@ def executeCommand(command, refresh_token):
 
     # Step 4: Execute the command
     print("Executing the command...")
+    command = f"{command_type}:\"{command_message}\""
     status_code, response_text = run_cmd(command, device_type, device_serial_number, customerId, cookies)
     print(status_code, response_text)
 
