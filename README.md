@@ -1,7 +1,7 @@
 # alexa_api
 
-[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.0/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.0/)
+[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.1/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.1/)
 [![License](https://img.shields.io/pypi/l/alexa-api.svg)](https://spdx.org/licenses/MIT.html)
 
 -----
@@ -60,7 +60,7 @@ Parameters:
 - `refresh_token`: the refresh token of your account.
 
 ```Python
-execute_commands(command_type, command_message, refresh_token, device)
+execute_command(command_type, command_message, refresh_token, device)
 ```
 
 Parameters:
