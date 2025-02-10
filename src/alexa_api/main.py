@@ -1,12 +1,14 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
 
 alexa_domain = "alexa.amazon.com"
 amazon = "amazon.com"
 tts_locale = "en_US"
 
-def run_cmd(command, device_type, device_serial_number, media_owner_customer_id, cookie):
+cookie_list = []
+
+def run_cmd(command_type, command_message, device_type, device_serial_number, media_owner_customer_id, cookie):
     # Base headers
     session = requests.Session()
     session.cookies.update(cookie)
@@ -21,22 +23,21 @@ def run_cmd(command, device_type, device_serial_number, media_owner_customer_id,
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Language": "en-US,en;q=0.9"
     }
-    
-    # print(cookie)
+
 
     # print(session.cookies.get_dict())
 
     
     # Handle `textcommand` requests
-    if command.startswith("textcommand:"):
+    if command_type == "textcommand":
         sequence_cmd = 'Alexa.TextCommand\",\"skillId\":\"amzn1.ask.1p.tellalexa'
-        text = command.split("textcommand:", 1)[1].replace('"', "'")
+        text = "'" + command_message + "'"
         sequence_val = f',"text":"{text}"'
         alexa_cmd = build_alexa_command(sequence_cmd, sequence_val, device_type, device_serial_number, media_owner_customer_id, tts_locale)
     
     # Handle `speak` requests
-    elif command.startswith("speak:"):
-        tts = command.split("speak:", 1)[1].replace('"', "'")
+    elif command_type == "speak":
+        tts = "'" + command_message + "'"
         sequence_cmd = "Alexa.Speak"
         sequence_val = f',"textToSpeak":"{tts}"'
         alexa_cmd = build_alexa_command(sequence_cmd, sequence_val, device_type, device_serial_number, media_owner_customer_id, tts_locale)
@@ -137,11 +138,25 @@ def get_devlist(cookie):
 
 
 
-def set_device(devlist, device):
+def set_device(devlist, device=None):
     # Ensure 'devices' key is in the dictionary and it's a list
     if not isinstance(devlist, dict) or "devices" not in devlist or not isinstance(devlist["devices"], list):
         print("Invalid device list format.")
-        return {}
+        return None
+    
+    if not device:
+        if (len(devlist["devices"])) == 0:
+            print("No available device")
+            return {}
+        device_info = devlist["devices"][0]
+        print("Using first device by default")
+        return {
+            "device": device_info.get("accountName", "Unknown Device"),
+            "deviceSerialnumber": device_info["serialNumber"],
+            "devicefamily": device_info["deviceFamily"],
+            "devicetype": device_info["deviceType"],
+        }
+
 
     # Iterate through devices in the list
     for device_info in devlist["devices"]:
@@ -149,13 +164,13 @@ def set_device(devlist, device):
             if device_info.get("accountName") == device:
                 return {
                     "device": device_info.get("accountName", "Unknown Device"),
-                    "deviceserialnumber": device_info["serialNumber"],
+                    "deviceSerialnumber": device_info["serialNumber"],
                     "devicefamily": device_info["deviceFamily"],
                     "devicetype": device_info["deviceType"],
                 }
 
     print("Device not found")
-    return {}
+    return None
 
 
 def check_status(cookies):
@@ -184,6 +199,39 @@ def check_status(cookies):
 
 
 def fetch_cookie_with_refresh_token(refresh_token):
+    current_time = datetime.now(timezone.utc)
+
+    for entry in cookie_list:
+        if entry.get("refresh_token") == refresh_token:
+            expire_times = entry.get("expire_times")
+            
+            # If any entries expired, fetch new cookies
+            for name, expire_time_string in expire_times.items():
+                expire_time = datetime.strptime(expire_time_string, "%d %b %Y %H:%M:%S GMT").replace(tzinfo=timezone.utc)
+                if expire_time <= current_time:
+                    print(f"Cookies expired at {expire_time}. fetching new cookies...")
+                    new_cookies, new_expire_times = fetch_new_cookies(refresh_token)
+                    entry["cookies"] = new_cookies
+                    entry["expire_times"] = new_expire_times
+                    return new_cookies
+                
+            print(f"Cookies found locally.")
+            return entry.get("cookies")
+
+            
+    print("No cookie found. fetching new cookies...")
+    cookies, expire_times = fetch_new_cookies(refresh_token)
+    cookie_list.append({
+        "refresh_token": refresh_token,
+        "cookies": cookies,
+        "expire_times": expire_times
+    })
+    return cookies
+
+
+def fetch_new_cookies(refresh_token):
+    
+
     # API endpoint and headers
     url = f"https://api.{amazon}/ap/exchangetoken/cookies"
     headers = {
@@ -202,26 +250,31 @@ def fetch_cookie_with_refresh_token(refresh_token):
 
     if response.status_code != 200:
         print(f"ERROR: Failed to fetch cookies. HTTP Status: {response.status_code}")
-        return False
+        return None, None
 
     # Parse the JSON response
     response_data = response.json()
     if "response" not in response_data or "tokens" not in response_data["response"] or "cookies" not in response_data["response"]["tokens"]:
         print("ERROR: Invalid response format.")
-        return False
+        return None, None
 
     cookies = response_data["response"]["tokens"]["cookies"]
 
+    # print(cookies)
+
 
     flattened = {}
+    expires = {}
     for domain, cookie in cookies.items():
         for c in cookie:
-            flattened[c["Name"]] = c["Value"]  # Extract Name-Value pairs
-    return flattened
+            flattened[c["Name"]] = c["Value"]
+            expires[c["Name"]] = c["Expires"]
+    return flattened, expires
 
 
 
-def execute_command(command_type, command_message, refresh_token, device):
+
+def execute_command(command_type, command_message, refresh_token, device=None):
 
     # Step 1: Fetch the cookie
     print("Fetching cookies...")
@@ -236,8 +289,11 @@ def execute_command(command_type, command_message, refresh_token, device):
     print("Finding the target device...")
     device_info = set_device(dev_list, device)
 
+    if not device_info:
+        return
+
     device_type = device_info["devicetype"]
-    device_serial_number = device_info["deviceserialnumber"]
+    device_serial_number = device_info["deviceSerialnumber"]
 
     # print(device_info)
 
@@ -245,8 +301,7 @@ def execute_command(command_type, command_message, refresh_token, device):
 
     # Step 4: Execute the command
     print("Executing the command...")
-    command = f"{command_type}:\"{command_message}\""
-    status_code, response_text = run_cmd(command, device_type, device_serial_number, customerId, cookies)
+    status_code, response_text = run_cmd(command_type, command_message, device_type, device_serial_number, customerId, cookies)
     print("Response:", status_code)
 
     return status_code, response_text

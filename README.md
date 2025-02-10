@@ -71,7 +71,7 @@ Parameters:
     - If using `speak` command: `command_message` is the text that will be read out by Alexa.
     - If using `textcommand` command: `command_message` is the command context that will be sent to Alexa.
 - `refresh_token`: the refresh token of your account.
-- `device`: the device name of the device that you want the command to execute on.
+- `device`: (Optional) the device name of the device that you want the command to execute on. If not specified, the first device in the device list will be used by default.
 
 
 
