@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "alexa-api"
-dynamic = ["version"]
 description = ''
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"

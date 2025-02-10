@@ -1,7 +1,4 @@
 import requests
-import re
-import json
-import os
 from datetime import datetime, timedelta
 
 
@@ -27,7 +24,7 @@ def run_cmd(command, device_type, device_serial_number, media_owner_customer_id,
     
     # print(cookie)
 
-    print(session.cookies.get_dict())
+    # print(session.cookies.get_dict())
 
     
     # Handle `textcommand` requests
@@ -55,10 +52,10 @@ def run_cmd(command, device_type, device_serial_number, media_owner_customer_id,
     )
     
     # Debugging
-    print("Request Headers:", headers)
-    print("Request Payload:", alexa_cmd)
-    print("Status Code:", response.status_code)
-    print("Response Body:", response.text)
+    # print("Request Headers:", headers)
+    # print("Request Payload:", alexa_cmd)
+    # print("Status Code:", response.status_code)
+    # print("Response Body:", response.text)
     
     return response.status_code, response.text
 
@@ -85,7 +82,7 @@ def extract_csrf(session):
         if response.status_code == 200:
             csrf_token = session.cookies.get("csrf")
             if csrf_token:
-                print("Extracted CSRF Token:", csrf_token)
+                # print("Extracted CSRF Token:", csrf_token)
                 return csrf_token
     
     print("ERROR: No CSRF token received!")
@@ -140,7 +137,7 @@ def get_devlist(cookie):
 
 
 
-def set_device(devlist, device=None):
+def set_device(devlist, device):
     # Ensure 'devices' key is in the dictionary and it's a list
     if not isinstance(devlist, dict) or "devices" not in devlist or not isinstance(devlist["devices"], list):
         print("Invalid device list format.")
@@ -156,23 +153,8 @@ def set_device(devlist, device=None):
                     "devicefamily": device_info["deviceFamily"],
                     "devicetype": device_info["deviceType"],
                 }
-        # if device not specified: find the first ECHO device.
-        elif "ECHO" in device_info.get("deviceFamily", ""):
 
-            # Ensure all required keys are present
-            required_keys = {"deviceType", "serialNumber", "deviceFamily"}
-            if not required_keys.issubset(device_info.keys()):
-                print("Invalid device entry format in device list.")
-                continue
-            
-            return {
-                "device": device_info.get("accountName", "Unknown Device"),
-                "deviceserialnumber": device_info["serialNumber"],
-                "devicefamily": device_info["deviceFamily"],
-                "devicetype": device_info["deviceType"],
-            }
-
-    print("No suitable device found")
+    print("Device not found")
     return {}
 
 
@@ -239,7 +221,7 @@ def fetch_cookie_with_refresh_token(refresh_token):
 
 
 
-def execute_command(command_type, command_message, refresh_token, device=None):
+def execute_command(command_type, command_message, refresh_token, device):
 
     # Step 1: Fetch the cookie
     print("Fetching cookies...")
@@ -252,12 +234,12 @@ def execute_command(command_type, command_message, refresh_token, device=None):
 
     # Step 3: Find the target device
     print("Finding the target device...")
-    device_info = set_device(dev_list)
+    device_info = set_device(dev_list, device)
 
     device_type = device_info["devicetype"]
     device_serial_number = device_info["deviceserialnumber"]
 
-    print(device_info)
+    # print(device_info)
 
     customerId = check_status(cookies)
 
@@ -265,6 +247,15 @@ def execute_command(command_type, command_message, refresh_token, device=None):
     print("Executing the command...")
     command = f"{command_type}:\"{command_message}\""
     status_code, response_text = run_cmd(command, device_type, device_serial_number, customerId, cookies)
-    print(status_code, response_text)
+    print("Response:", status_code)
 
     return status_code, response_text
+
+def get_device_list(refresh_token):
+    cookies = fetch_cookie_with_refresh_token(refresh_token)
+
+    print("Fetching device list...")
+    dev_list = get_devlist(cookies)
+    account_names = [device["accountName"] for device in dev_list.get("devices", []) if "accountName" in device]
+    return account_names
+
