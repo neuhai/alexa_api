@@ -1,7 +1,6 @@
-# alexa_control_api
+# alexa_api
 
-[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/0.0.1/)
 
 -----
 
