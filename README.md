@@ -1,7 +1,7 @@
 # alexa_control_api
 
-[![PyPI - Version](https://img.shields.io/pypi/v/alexa-control-api.svg)](https://pypi.org/project/alexa-control-api)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-control-api.svg)](https://pypi.org/project/alexa-control-api)
+[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api)
 
 -----
 
@@ -13,7 +13,7 @@
 ## Installation
 
 ```console
-pip install alexa-control-api
+pip install alexa-api
 ```
 
 ## License
