@@ -133,9 +133,12 @@ def build_alexa_command(
 
 
 def get_devlist(refresh_token, refresh=False):
+    # not refresh if devlist found locally and not forcefully refresh
     if refresh_token in devlist_list and not refresh:
         logger.debug("Device list found locally.")
         return devlist_list[refresh_token]
+    
+    # refresh if devlist not found locally or forcefully refresh
     else:
         if refresh_token not in devlist_list:
             logger.debug("Device list not found locally.")
@@ -177,16 +180,9 @@ def fetch_new_devlist(cookie):
 
 
 def set_device(refresh_token, device=None):
-    # Ensure 'devices' key is in the dictionary and it's a list
     devlist = get_devlist(refresh_token, refresh=(device is None))
-    if (
-        not isinstance(devlist, dict)
-        or "devices" not in devlist
-        or not isinstance(devlist["devices"], list)
-    ):
-        logger.error("Invalid device list format.")
-        return None
 
+    # if using default device: always refresh to make sure latest is used
     if not device:
         if (len(devlist["devices"])) == 0:
             logger.error("No available device")
@@ -200,6 +196,7 @@ def set_device(refresh_token, device=None):
             "deviceType": device_info["deviceType"],
         }
 
+    # if using specific device: only refresh if the device cannot be found locally
     device_detail = find_device(devlist, device)
     if device_detail is None:
         logger.debug("Device not found locally.")
