@@ -21,6 +21,15 @@
 pip install alexa-api
 ```
 
+```console
+pip install https://github.com/neuhai/alexa_api/archive/refs/tags/v1.0.4.tar.gz
+```
+
+```console
+pip install git+https://github.com/neuhai/alexa_api.git
+```
+
+
 ## Usage
 To use the library, first download from https://github.com/adn77/alexa-cookie-cli/releases/tag/v5.0.1
 
@@ -77,7 +86,8 @@ Parameters:
 - `device`: (Optional) the device name of the device that you want the command to execute on. If not specified, the first device in the device list will be used by default.
 
 Returns:
-- 
+- `status_code`: the status code of the HTTP response from Alexa.
+- `response_text`: the text of the HTTP response from Alexa.
 
 
 

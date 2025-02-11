@@ -137,7 +137,7 @@ def get_devlist(refresh_token, refresh=False):
     if refresh_token in devlist_list and not refresh:
         logger.debug("Device list found locally.")
         return devlist_list[refresh_token]
-    
+
     # refresh if devlist not found locally or forcefully refresh
     else:
         if refresh_token not in devlist_list:
