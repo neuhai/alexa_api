@@ -59,6 +59,9 @@ get_device_list(refresh_token)
 Parameters:
 - `refresh_token`: the refresh token of your account.
 
+Returns:
+- `device_list`: a list of string. Each string is the device name of an available device.
+
 ```Python
 execute_command(command_type, command_message, refresh_token, device)
 ```
@@ -72,6 +75,9 @@ Parameters:
     - If using `textcommand` command: `command_message` is the command context that will be sent to Alexa.
 - `refresh_token`: the refresh token of your account.
 - `device`: (Optional) the device name of the device that you want the command to execute on. If not specified, the first device in the device list will be used by default.
+
+Returns:
+- 
 
 
 
