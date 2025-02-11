@@ -1,2 +1,5 @@
-.DS_Store
-src/alexa_api/__pycache__
+**/.DS_Store
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
