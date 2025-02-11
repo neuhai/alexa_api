@@ -1,7 +1,7 @@
 # alexa_api
 
-[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.2/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.2/)
+[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.3/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.3/)
 [![License](https://img.shields.io/pypi/l/alexa-api.svg)](https://spdx.org/licenses/MIT.html)
 
 -----
