@@ -4,3 +4,4 @@
 **/*.pyo
 **/*.pyd
 .pre-commit-config.yaml
+dist/*
