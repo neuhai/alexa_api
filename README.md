@@ -1,7 +1,7 @@
 # alexa_api
 
-[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.4/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.4/)
+[![PyPI - Version](https://img.shields.io/pypi/v/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.5/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alexa-api.svg)](https://pypi.org/project/alexa-api/1.0.5/)
 [![License](https://img.shields.io/pypi/l/alexa-api.svg)](https://spdx.org/licenses/MIT.html)
 
 -----
@@ -22,7 +22,7 @@ pip install alexa-api
 ```
 
 ```console
-pip install https://github.com/neuhai/alexa_api/archive/refs/tags/v1.0.4.tar.gz
+pip install https://github.com/neuhai/alexa_api/archive/refs/tags/v1.0.5.tar.gz
 ```
 
 ```console

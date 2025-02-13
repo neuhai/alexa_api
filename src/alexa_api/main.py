@@ -181,6 +181,9 @@ def fetch_new_devlist(cookie):
 
 def set_device(refresh_token, device=None):
     devlist = get_devlist(refresh_token, refresh=(device is None))
+    if not devlist or not devlist['devices']:
+        logger.error("Malformatted device list.")
+        return None
 
     # if using default device: always refresh to make sure latest is used
     if not device:
@@ -210,6 +213,10 @@ def set_device(refresh_token, device=None):
 
 
 def find_device(devlist, device):
+    if not devlist or not devlist["devices"]:
+        logger.error("Malformatted device list")
+        return None
+
     for device_info in devlist["devices"]:
         if device != None:
             if device_info.get("accountName") == device:
