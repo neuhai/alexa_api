@@ -136,7 +136,7 @@ def get_devlist(refresh_token, refresh=False):
     # not refresh if devlist found locally and not forcefully refresh
     if refresh_token in devlist_list and not refresh:
         logger.debug("Device list found locally.")
-        return devlist_list[refresh_token]
+        return devlist_list.get(refresh_token, { "devices": [] })
 
     # refresh if devlist not found locally or forcefully refresh
     else:
@@ -181,22 +181,22 @@ def fetch_new_devlist(cookie):
 
 def set_device(refresh_token, device=None):
     devlist = get_devlist(refresh_token, refresh=(device is None))
-    if not devlist or not devlist['devices']:
+    if not devlist or 'devices' not in devlist:
         logger.error("Malformatted device list.")
         return None
 
     # if using default device: always refresh to make sure latest is used
     if not device:
-        if (len(devlist["devices"])) == 0:
+        if (len(devlist.get("devices", []))) == 0:
             logger.error("No available device")
             return {}
-        device_info = devlist["devices"][0]
+        device_info = devlist.get("devices")[0]
         logger.info("Using first device by default")
         return {
             "device": device_info.get("accountName", "Unknown Device"),
-            "deviceSerialNumber": device_info["serialNumber"],
-            "deviceFamily": device_info["deviceFamily"],
-            "deviceType": device_info["deviceType"],
+            "deviceSerialNumber": device_info.get("serialNumber", ""),
+            "deviceFamily": device_info.get("deviceFamily", ""),
+            "deviceType": device_info.get("deviceType",""),
         }
 
     # if using specific device: only refresh if the device cannot be found locally
@@ -213,18 +213,18 @@ def set_device(refresh_token, device=None):
 
 
 def find_device(devlist, device):
-    if not devlist or not devlist["devices"]:
+    if not devlist or 'devices' not in devlist:
         logger.error("Malformatted device list")
         return None
 
-    for device_info in devlist["devices"]:
+    for device_info in devlist.get("devices", []):
         if device != None:
-            if device_info.get("accountName") == device:
+            if device_info.get("accountName", "") == device:
                 return {
                     "device": device_info.get("accountName", "Unknown Device"),
-                    "deviceSerialNumber": device_info["serialNumber"],
-                    "deviceFamily": device_info["deviceFamily"],
-                    "deviceType": device_info["deviceType"],
+                    "deviceSerialNumber": device_info.get("serialNumber", ""),
+                    "deviceFamily": device_info.get("deviceFamily", ""),
+                    "deviceType": device_info.get("deviceType",""),
                 }
     return None
 
@@ -257,8 +257,8 @@ def fetch_cookie_with_refresh_token(refresh_token):
     current_time = datetime.now(timezone.utc)
 
     if refresh_token in cookie_list:
-        entry = cookie_list[refresh_token]
-        expire_times = entry["expire_times"]
+        entry = cookie_list.get(refresh_token, { "cookies": [], "expire_times": [] })
+        expire_times = entry.get("expire_times", [])
         # If any entries expired, fetch new cookies
         for name, expire_time_string in expire_times.items():
             expire_time = datetime.strptime(
@@ -319,8 +319,11 @@ def fetch_new_cookies(refresh_token):
     expires = {}
     for domain, cookie in cookies.items():
         for c in cookie:
-            flattened[c["Name"]] = c["Value"]
-            expires[c["Name"]] = c["Expires"]
+            if "Name" not in c:
+                logger.error("Malformatted cookie")
+                return None, None
+            flattened[c["Name"]] = c.get("Value", "")
+            expires[c["Name"]] = c.get("Expires", "")
     return flattened, expires
 
 
@@ -337,8 +340,8 @@ def execute_command(command_type, command_message, refresh_token, device=None):
     if not device_info:
         return
 
-    device_type = device_info["deviceType"]
-    device_serial_number = device_info["deviceSerialNumber"]
+    device_type = device_info.get("deviceType", "")
+    device_serial_number = device_info.get("deviceSerialNumber", "")
 
     customerId = get_customer_id(cookies)
 
@@ -363,7 +366,7 @@ def get_device_list(refresh_token):
     logger.debug("Fetching device list...")
     dev_list = get_devlist(refresh_token, True)
     account_names = [
-        device["accountName"]
+        device.get("accountName", "")
         for device in dev_list.get("devices", [])
         if "accountName" in device
     ]
